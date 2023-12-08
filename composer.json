@@ -1,0 +1,21 @@
+{
+    "name": "relvitas/key_chest",
+    "description": "key chest, es un gestor de contraseñas de usuario.",
+    "type": "project",
+    "license": "propietary",
+    "authors": [
+        {
+            "name": "relvitas",
+            "email": "androidgm34@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "~8.1",
+        "phpmailer/phpmailer": "6.9.*"
+    },
+    "autoload": {
+        "psr-4": {
+
+        }
+    }
+}
