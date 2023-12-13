@@ -1,4 +1,6 @@
 <?php
+//llamada utilidad control de errores custom
+require_once 'utils/custom_error_handler.php';
 //llamada a conexión db
 require_once 'db/connection.php';
 

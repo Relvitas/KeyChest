@@ -1,9 +1,12 @@
 <?php
+//mostrar todos los errores de php
 error_reporting(E_ALL);
+//desactivar el muestreo de errores en display
+ini_set('display_errors', 0);
 
 function log_error($errno, $errstr, $errfile, $errline) {
     //ruta del archivo log
-    $path = 'logs/error_log.txt';
+    $path = '../logs/error_log.txt';
 
     //lectura contenido actual de fichero log
     $aboveContent = file_get_contents($path);
