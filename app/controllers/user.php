@@ -37,6 +37,7 @@ class UserController {
     //método iniciar sesión
     public function sign_in() {
         if (isset($_POST['sign_in'])) {
+            //validar datos post no estén vacíos y almacenar
             $email = empty($_POST['email']) 
                 ? null 
                 : $_POST['email'];
@@ -44,14 +45,35 @@ class UserController {
             $password = empty($_POST['password'])
                 ? null 
                 : $_POST['password'];
-
+            
+            //validar que post sea diferente de null
             if ($email != null && $password != null) {
-                if ($this->userModel->validate_sign_in($email, $password)) {
-                    $this->view('home');
+                //llamada a la función 'validate_email_user' para obtener id y validar email
+                if ($userData = $this->userModel->validate_email_user($email)) {
+                    //validar inicio sesión 'modelUser>validate_sign_in'
+                    if ($this->userModel->validate_sign_in($email, $password, $userData->id)) {
+                        //creamos sesión
+                        session_start();
+                        //almacenamos datos de sesión
+                        $_SESSION['user']['id'] = $userData->id;
+                        $_SESSION['user']['name'] = $userData->nombre;
+                        //cargar vista inicio
+                        $this->view('home');
+                    } else {
+                        //contraseña incorrecta
+                        $this->view('sign_in', 'clave_incorrecta');
+                    }
                 } else {
-                    $this->view('sign_in');
+                    //correo incorrecto
+                    $this->view('sign_in', 'correo_inexistente');
                 }
+            } else {
+                //datos incompletos
+                $this->view('sign_in', 'datos_incompletos');
             }
+        } else {
+            //acceso incorrecto
+            $this->view('sign_in', 'acceso_incorrecto');
         }
     }
 
