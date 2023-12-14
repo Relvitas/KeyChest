@@ -7,10 +7,10 @@ class UserModel {
         $this->connection = $connection;
     }
 
-        //validar existencia de correo de usuario, y retorna el id de usuario
+        //validar existencia de correo de usuario, y retorna datos
         public function validate_email_user($email) {
             try {
-                $prepare = $this->connection->prepare('SELECT id FROM usuario WHERE correo = ?');
+                $prepare = $this->connection->prepare('SELECT * FROM usuario WHERE correo = ?');
                 $prepare->execute(array($email));
                 return $result = $prepare->fetch(PDO::FETCH_OBJ);
             } catch (PDOException $e) {
@@ -19,30 +19,23 @@ class UserModel {
         }
     
         //validar datos de inicio de sesión
-        public function validate_sign_in($email, $password) {
-            //llamada a la función 'validate_email_user' para obtener id y validar email
-            $id = $this->validate_email_user($email);
-            //validar si devuelve datos
-            if ($id) {
-                try {
-                    //preparar consulta para obtener hash de usuario
-                    $prepare = $this->connection->prepare('SELECT contrasenia FROM usuario WHERE id = ?');
-                    $prepare->execute(array($id->id));
-                    $data = $prepare->fetch(PDO::FETCH_OBJ);
-    
-                    //validar si devuelve datos
-                    if ($data) {
-                        if (password_verify($password, $data->contrasenia)) {
-                            return true;
-                        } else {
-                            return false;
-                        }
+        public function validate_sign_in($email, $password, $id) {
+            try {
+                //preparar consulta para obtener hash de usuario
+                $prepare = $this->connection->prepare('SELECT contrasenia FROM usuario WHERE id = ?');
+                $prepare->execute(array($id));
+                $data = $prepare->fetch(PDO::FETCH_OBJ);
+
+                //validar si devuelve datos
+                if ($data) {
+                    if (password_verify($password, $data->contrasenia)) {
+                        return true;
+                    } else {
+                        return false;
                     }
-                } catch (PDOException $e) {
-                    die('Error: ' . $e->getMessage());
                 }
-            } else {
-                return 'correo_inexistente';
+            } catch (PDOException $e) {
+                die('Error: ' . $e->getMessage());
             }
         }
 
