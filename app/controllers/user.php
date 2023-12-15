@@ -1,7 +1,6 @@
 <?php
 
 class UserController {
-    private string $page_title;
     private UserModel $userModel;
     private TokenModel $tokenModel;
     private EmailSender $emailSender;
