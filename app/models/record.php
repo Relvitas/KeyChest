@@ -1,5 +1,5 @@
 <?php
-class HomeModel {
+class RecordModel {
     private ?PDO $connection = null; 
 
     public function __construct(PDO $connection){

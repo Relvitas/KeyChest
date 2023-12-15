@@ -1,13 +1,13 @@
 <?php
-class HomeController {
-    private HomeModel $homeModel;
+class RecordController {
+    private RecordModel $recordModel;
 
     public function __construct(){
         //llamada modelo 'new_record'
         require_once 'models/home.php';
 
         //instancia 'HomeModel'
-        $this->homeModel = new HomeModel(
+        $this->recordModel = new RecordModel(
             //dependencia conexión db
             Connection::connection()
         );
@@ -58,7 +58,7 @@ class HomeController {
             $data['id'] = $_SESSION['user']['id'];
             
             //llamada método insertar nuevo registro
-            if ($this->homeModel->save_record(
+            if ($this->recordModel->save_record(
                 $data['id'],
                 ucfirst(strtolower($data['website'])),
                 ucfirst(strtolower($data['username'])),
