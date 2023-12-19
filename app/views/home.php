@@ -2,7 +2,7 @@
     <div>
         <fieldset>
             <legend>Nuevo Registro</legend>
-            <form action="?c=home&a=save_record" method="post">
+            <form action="?c=record&a=save_record" method="post">
                 <div>
                     <label for="website">Sitio Web</label>
                     <input type="text" name="website" id="website" required>
