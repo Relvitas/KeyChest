@@ -242,4 +242,88 @@ class RecordModel {
             return false;
         }
     }
+
+    // Método encargado de obtener la paginación
+    public function pagination($idUser, $pageLimit) {
+        /*
+        Sentencia sql utilizada para obtener todos
+        los registros/credenciales de acceso del usuario
+        para establecer una paginación 
+        */
+        $sql = '
+            SELECT
+                portal_registro.nombre as sitio_web,
+                correo_registro.correo,
+                nombre_registro.nombre as nombre_usuario,
+                telefono_registro.telefono,
+                dato_registro.contrasenia,
+                dato_registro.clave_recuperacion 
+            FROM
+                dato_registro 
+            INNER JOIN
+                portal_registro ON dato_registro.id_portal_registro = portal_registro.id 
+            LEFT JOIN
+                correo_registro ON dato_registro.id_correo_registro = correo_registro.id 
+            LEFT JOIN
+                nombre_registro ON dato_registro.id_nombre_registro = nombre_registro.id 
+            LEFT JOIN
+                telefono_registro ON dato_registro.id_telefono_registro = telefono_registro.id 
+            WHERE
+                dato_registro.id_usuario = ?;
+        ';
+        try {
+            $prepare = $this->connection->prepare($sql);
+            $prepare->execute([$idUser]);
+            //validar si se obtuvieron datos
+            if ($numberRows = $prepare->rowCount()) {
+                return $totalPages = ceil($numberRows/$pageLimit); //obtener total de paginaciones
+            }
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    // Método encargado de retornar los registros del usuario
+    public function list_record($idUser, $startFrom, $pageLimit) {
+        /*
+        Sentencia SQL encarga de consultar los
+        registros/credenciales de acceso de los
+        diferentes sitios web del usuario
+        */
+        $sql = '
+            SELECT
+                portal_registro.nombre as sitio_web,
+                correo_registro.correo,
+                nombre_registro.nombre as nombre_usuario,
+                telefono_registro.telefono,
+                dato_registro.contrasenia,
+                dato_registro.clave_recuperacion 
+            FROM
+                dato_registro 
+            INNER JOIN
+                portal_registro ON dato_registro.id_portal_registro = portal_registro.id 
+            LEFT JOIN
+                correo_registro ON dato_registro.id_correo_registro = correo_registro.id 
+            LEFT JOIN
+                nombre_registro ON dato_registro.id_nombre_registro = nombre_registro.id 
+            LEFT JOIN
+                telefono_registro ON dato_registro.id_telefono_registro = telefono_registro.id 
+            WHERE
+                dato_registro.id_usuario = ?
+            LIMIT
+                ?, ?
+        ';
+        try {
+            $prepare = $this->connection->prepare($sql);
+            $prepare->bindParam(1, $idUser, PDO::PARAM_INT);
+            $prepare->bindParam(2, $startFrom, PDO::PARAM_INT);
+            $prepare->bindParam(3, $pageLimit, PDO::PARAM_INT);
+            $prepare->execute();
+            return $prepare->fetchAll(PDO::FETCH_OBJ);
+        } catch(PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
 }

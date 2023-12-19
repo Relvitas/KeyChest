@@ -6,6 +6,9 @@ class RecordController {
         //llamada modelo 'new_record'
         require_once 'models/record.php';
 
+        //llamada utilidad de paginación
+        require_once 'utils/paginator.php';
+
         //instancia 'HomeModel'
         $this->recordModel = new RecordModel(
             //dependencia conexión db
@@ -192,8 +195,81 @@ class RecordController {
         }
     }
 
+    // Método para listar registros
+    public function list_record() {
+        session_start();
+        if (!isset($_SESSION['user']['id'])) {
+            $this->view('sign_in');
+            
+        } else {
+            /*
+            Validar si las variables get se están enviando
+            y estas no se encuentran vacías
+            */
+            if (
+                (!isset($_GET['c']) && empty($_GET['c'])) && 
+                (!isset($_GET['a']) && empty($_GET['a']))
+                ) {
+                    // Carga de vista
+                    $this->view('home');
+            } else {
+                /* 
+                Almacenar id usuario para 
+                un uso posterior junto con el método
+                pagination 'RecordModel'
+                */
+                $idUser = $_SESSION['user']['id'];
+
+                /*
+                Obtener el numero de pagina seleccionada 
+                por el usuario o establecer default en 1
+                */
+                $page = isset($_GET['p']) && !empty($_GET['p']) 
+                    ? $_GET['p']
+                    : 1;
+
+                /*
+                $pageLimit, establece el limite de
+                cantidad de regustos maxima que queramos
+                mostrar tabla
+                */
+                $pageLimit = 5; 
+
+                /*
+                $startForm, configuración que contiene
+                el numero de pagina que se desea mostrar
+                */
+                $startFrom = ($page-1)*$pageLimit;
+
+                /*
+                Se obtiene el numero total de registros
+                este es almacenado en $totalPages, para un
+                posterior uso con la función paginator
+                */
+                $totalPages = $this->recordModel->pagination($idUser, $pageLimit);
+
+                /*
+                paginator (utils)Método encargado de establecer la paginación
+                que vera el usuario en tabla, esta retorna una cadena
+                que contiene las paginas disponibles
+                */
+                $pagination = paginator($page, $totalPages, '?c=record&a=list_record&p=');
+                
+                /*
+                Se obtienen lo registros y son pasados a la
+                vista junto con la paginación, para su posterior visualización
+                */
+                if ($records = $this->recordModel->list_record($idUser, $startFrom, $pageLimit)) {
+                    $this->view('records', $records, $pagination);
+                } else {
+                    $this->view('home', 'error_sistema');
+                }
+            }
+        }
+    }
+
     // Método seleccionador de vista
-    public function view($view, $info = null) {
+    public function view($view, $info = null, $pagination = null) {
 
         //array de posibles vistas de primera vista (acceso)
         $views = [

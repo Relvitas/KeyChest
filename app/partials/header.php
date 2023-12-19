@@ -9,6 +9,7 @@
             <nav>
                 <ul>
                     <li><a href="?v=home">Inicio</a></li>
+                    <li><a href="?c=record&a=list_record">Registros</a></li>
                 </ul>
             </nav>
         </header>
