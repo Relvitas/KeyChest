@@ -4,7 +4,7 @@ class RecordController {
 
     public function __construct(){
         //llamada modelo 'new_record'
-        require_once 'models/home.php';
+        require_once 'models/record.php';
 
         //instancia 'HomeModel'
         $this->recordModel = new RecordModel(
@@ -13,64 +13,182 @@ class RecordController {
         );
     }
 
-    /**
-     * este método almacena un nuevo registro
-     */
+    // Método encargado de almacenar registros
     public function save_record(){
-        //validar si se pulsa botón 'save_record' 
-        if (isset($_POST['save_record'])) {
-            // Campos POST
-            $fields = ['website', 'password', 'username', 'tel', 'email', 'recoveryKey'];
-            $data = []; //array para almacenar datos POST
-            //iterar array $fields
+        /*
+        Evaluar existencia de sesión de usuario
+        en caso de que esta no exista la vista
+        que cargara sera la de iniciar sesión
+        */
+        session_start();
+        if (!isset($_SESSION['user']['id'])) {
+            $this->view('sign_in');
+
+        } else { 
+            /* 
+            $flag es utilizada dentro de bucles
+            y condicionales para evaluar si se
+            debe ejecutar código
+            */
+            $flag = true;
+
+            /* 
+            $message, contendrá el mensaje error 
+            que sera el argumento a pasar a la función view()
+            */
+            $message = '';
+
+            /*
+            $data, array que tendrá en su interior
+            toda la información que se esta enviando via
+            POST del formulario de nuevo registro 'home' y
+            ademas de esta tendrá una configuración inicial que
+            almacenara el id de usuario de sesión
+            */
+            $data = ['idUser' => $_SESSION['user']['id']];
+
+            /* 
+            $fields array contenedor de los posibles campos 
+            via POST del formulario de home.php
+            */
+            $fields = [
+                'save_record',
+                'website', 
+                'password', 
+                'username', 
+                'tel', 
+                'email', 
+                'recoveryKey'
+            ];
+
+            /*
+            Bucle encargado de evaluar si las variables
+            POST están definidas
+            */
             foreach ($fields as $field) {
-                // evaluar si los campos están definidos
-                if (isset($_POST[$field])){
-                    // evaluar posibles casos y si están vacíos
-                    switch ($field) {
-                        case 'username':
-                        case 'tel':
-                        case 'recoveryKey':
-                        case 'email':
-                            // en caso de que las variables POST estén vacías se asigna null
-                            !empty($_POST[$field]) ? $data[$field] = $_POST[$field] : $data[$field] = null;
-                            break;
-                        case 'website':
-                        case 'password':
-                            // en caso de que estén vacías carga vista home por campos incompletos
-                            if (empty($_POST[$field])){
-                                $this->view('home', 'campos_incompletos');
-                                break 2; //salir del switch y del bucle foreach
-                            }
-                            $data[$field] = $_POST[$field];
-                            break; //salir del switch
-                    }
-                } else {
-                    $this->view('home', 'acceso_error');
-                    break; // salir del bucle foreach
+                if(!isset($_POST[$field])){
+                    $flag = false;
                 }
             }
 
-            //restaurar sesión
-            session_start();
+            /*
+            Mostrar vista home en la cual se encuentra
+            el formulario para realizar nuevos registros
+            */
+            if (!$flag) {
+                $this->view('home');
 
-            //almacenar idUsuario
-            $data['id'] = $_SESSION['user']['id'];
-            
-            //llamada método insertar nuevo registro
-            if ($this->recordModel->save_record(
-                $data['id'],
-                ucfirst(strtolower($data['website'])),
-                ucfirst(strtolower($data['username'])),
-                strtolower($data['email']),
-                $data['tel'],
-                $data['password'],
-                $data['recoveryKey']
-            )) {
-                $this->view('home', 'exito');
+            // Si todo esta bien
             } else {
-                $this->view('home', 'error_sistema');
-            }
+                /*
+                Construcción final ($data), este tendrá toda
+                los datos post necesarios y formateados para el
+                posterior uso, este bucle contiene $flag
+                */
+                foreach ($fields as $field) {
+
+                    switch ($field) {
+                        case 'website':
+                        case 'username':
+
+                            // Primer carácter en mayúscula resto en minúscula
+                            $data[$field] = !empty($_POST[$field]) 
+                                ? ucfirst(strtolower($_POST[$field]))
+                                : '';
+                            break;
+                        case 'email':
+                            
+                            // Minúsculas
+                            $data[$field] = !empty($_POST[$field])
+                                ? strtolower($_POST[$field])
+                                : '';
+                            break;
+                        case 'tel':
+                            /* Validaciones para el teléfono.
+                            Se establece regla de longitud y regla de
+                            que contenga solo números
+                            */
+                            if (!empty($_POST[$field])) {
+
+                                if (!(strlen($_POST[$field]) <= 25)) {
+                                    // Uso de bandera
+                                    $flag = false;
+                                    // Mensaje con tipo error
+                                    $message = 'supera_longitud';
+                                    break 2;
+                                }
+                
+                                if (!ctype_digit($_POST[$field])) {
+                                    // Uso de bandera
+                                    $flag = false;
+                                    // Mensaje con tipo error
+                                    $message = 'numero_invalido';
+                                    break 2;
+                                }
+                                
+                                $data[$field] = $_POST[$field];
+                            } else {
+                                $data[$field] = '';
+                            }
+                            break;
+                        case 'recoveryKey':
+
+                            $data[$field] = !empty($_POST[$field])
+                                ? $_POST[$field]
+                                : '';
+                            break;
+                        case 'password':
+                            /*
+                            Validaciones para la contraseña
+                            esta no debe superar el limite de 255
+                            caracteres y es obligatorio que el campo
+                            sea rellenado
+                            */
+                            if (!empty($_POST[$field])){
+
+                                if (strlen($_POST[$field]) > 255) {
+                                    // Uso de bandera
+                                    $flag = false;
+                                    // Mensaje con tipo error
+                                    $message = 'contraseña_invalida';
+                                    break 2;
+                                }
+    
+                                $data[$field] = $_POST[$field];
+                            } else {
+
+                                // Uso de bandera
+                                $flag = false;
+                                // mensaje tipo error
+                                $message = 'campos_requeridos';
+                                break 2;
+                            }
+                    }
+                }
+                /*
+                Mostrar vista home en la cual se encuentra el formulario 
+                para realizar nuevos registros, dado a que el usuario 
+                no relleno los campos obligatorios
+                */
+                if (!$flag) {
+                    $this->view('home', $message);
+                
+                // Si todo esta bien
+                } else {
+                    /*
+                    Se hace llamada del método save_record
+                    de la clase RecordModel para realizar una nueva
+                    inserción de registro pasando como argumento $data
+                    array contenedor de configuración de información
+                    y evaluamos resultados
+                    */
+                    if ($this->recordModel->save_record($data)) {
+                        $this->view('home', 'exito');
+                    } else {
+                        $this->view('home', 'error');
+                    }
+                }
+            }      
         }
     }
 

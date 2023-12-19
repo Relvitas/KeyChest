@@ -19,7 +19,7 @@ class RecordModel {
             $prepare->execute([$email]);
             $idEmail = $prepare->fetch(PDO::FETCH_OBJ);
             if ($idEmail) {
-                return $idEmail;
+                return $idEmail->id;
             } else {
                 try {
                     //insertar nuevo correo registro y retornar id
@@ -57,7 +57,7 @@ class RecordModel {
             $idWebsite = $prepare->fetch(PDO::FETCH_OBJ);
             //validar si encontró datos
             if ($idWebsite) {
-                return $idWebsite;
+                return $idWebsite->id;
             } else {
                 //insertar nuevo portal registro y retornar id
                 try {
@@ -95,7 +95,7 @@ class RecordModel {
             $idTel = $prepare->fetch(PDO::FETCH_OBJ);
             //validar si se retornan datos
             if ($idTel) {
-                return $idTel;
+                return $idTel->id;
             } else {
                 try {
                     // insertar nuevo teléfono registro
@@ -134,7 +134,7 @@ class RecordModel {
             $idUsername = $prepare->fetch(PDO::FETCH_OBJ);
             //validar si se encuentran registros
             if ($idUsername) {
-                return $idUsername;
+                return $idUsername->id;
             } else {
                 //insertar nombre_registro 'nombre usuario'
                 try {
@@ -160,61 +160,67 @@ class RecordModel {
     }
 
     //insertar nuevo registro
-    public function save_record(
-        $idUser, 
-        $website, 
-        $username, 
-        $email, 
-        $tel, 
-        $password, 
-        $recoveryKey
-        ) {
-        //array de datos
+    public function save_record(array $data) {
+        /*
+        $data, tendera la configuración inicial
+        de los datos que fueron enviados como array
+        desde la función 'save_record > controller'
+        y sera este el array que se pasara como argumento
+        a la sentencia preparada
+        */
         $data = [
-            'id_usuario' => $idUser,
-            'id_portal_registro' => $website,
-            'id_correo_registro' => $email,
-            'id_nombre_registro' => $username,
-            'id_telefono_registro' => $tel,
-            'contrasenia' => $password,
-            'clave_recuperacion' => $recoveryKey
+            'id_usuario'           => $data['idUser'],
+            'id_portal_registro'   => $data['website'],
+            'id_correo_registro'   => $data['email'],
+            'id_nombre_registro'   => $data['username'],
+            'id_telefono_registro' => $data['tel'],
+            'contrasenia'          => $data['password'],
+            'clave_recuperacion'   => $data['recoveryKey']
         ];
 
-        //llamada método validate website name 'HomeModel'
-        if ($website !== null) {
-            $idWebsite = $this->validate_website_name($website);
-            $data['id_portal_registro'] = $idWebsite->id;
+        /* 
+        Las sentencias de control siguientes se encargaran
+        de realizar una validación de existencia y en caso de no
+        existir realizara una inserción, estos dos retornaran el id de dato
+        en caso de existir y del nuevo registro insertado.
+        */
+        if ($data['id_portal_registro'] !== '') {
+            $idWebsite = $this->validate_website_name($data['id_portal_registro']);
+            $data['id_portal_registro'] = $idWebsite;
         }
 
-        //llamada método validate email 'HomeModel'
-        if ($email !== null) {
-            $idEmail = $this->validate_email($email);
-            $data['id_correo_registro'] = $idEmail->id;
+        if ($data['id_correo_registro'] !== '') {
+            $idEmail = $this->validate_email($data['id_correo_registro']);
+            $data['id_correo_registro'] = $idEmail;
         }
 
-        //llamada método validate nombre usuario 'HomeModel'
-        if ($username !== null) {
-            $idUsername = $this->validate_username($username);
-            $data['id_nombre_registro'] = $idUsername->id;
+        if ($data['id_nombre_registro'] !== '') {
+            $idUsername = $this->validate_username($data['id_nombre_registro']);
+            $data['id_nombre_registro'] = $idUsername;
         }
 
-        //llamada método validate telefono 'HomeModel'
-        if ($tel !== null) {
-            $idTel = $this->validate_tel($tel);
-            $data['id_telefono_registro'] = $idTel->id;
+        if ($data['id_telefono_registro'] !== '') {
+            $idTel = $this->validate_tel($data['id_telefono_registro']);
+            $data['id_telefono_registro'] = $idTel;
         }
 
-        //eliminación de datos null, para ejecución de consulta preparada
+        /*
+        Construcción final del array $data.
+        El bucle tiene la función de eliminar los valores que se encuentran 
+        representados como cadenas vacías ('') dentro del array $data. Esto 
+        se realiza con el objetivo de preparar la inserción de datos en el 
+        array de manera adecuada, evitando la presencia de valores no existentes.
+        */
         foreach ($data as $key => $value) {
-            if ($value === null){
+            if ($value === ''){
                 unset($data[$key]);
             }
         }
 
         /*
-        Construcción dinámica de campos
-        y marcadores, para la posterior 
-        elaboración de consulta sql
+        Construcción inicial de sentencia SQL, la construcción 
+        dinámica de campos y de marcadores, para la posterior 
+        elaboración de consulta preparada sql
         */
         $field = '';
         $marker = '';
@@ -223,10 +229,10 @@ class RecordModel {
             $marker .= ($marker ? ', ' : '') . ":$key";
         }
 
-        //sentencia sql elaborada
+        // Construcción final de sentencia SQL
         $sql = "INSERT INTO dato_registro ($field) VALUES ($marker)";
 
-        //insertar datos
+        // Inserción de datos
         try {
             $prepare = $this->connection->prepare($sql);
             $prepare->execute($data);
