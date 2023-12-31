@@ -28,6 +28,7 @@
                         <td><?= $object->correo == null ? 'N/A' : $object->correo ?></td>
                         <td><?= $object->contrasenia?></td>
                         <td><?= $object->clave_recuperacion == null ? 'N/A' : $object->clave_recuperacion ?></td>
+                        <td><a href="?id=<?= $object->id_registro?>&c=record&a=edit_record">Editar</a></td>
                     </tr>
                 <?php 
                 endforeach;
