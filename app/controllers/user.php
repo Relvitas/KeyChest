@@ -247,21 +247,6 @@ class UserController {
         }
     }
 
-    private function user_session($email, $password) {
-        session_start();
-        $userEmail = empty($email) 
-            ? null 
-            : $email;
-        
-        $userPassword = empty($password)
-            ? null 
-            : $password;
-        
-        if ($userEmail === null && $userPassword === null) {
-            header('index.php');
-        }
-    }
-
     public function sign_out() {
         session_start();
         session_destroy();

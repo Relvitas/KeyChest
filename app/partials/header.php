@@ -10,6 +10,7 @@
                 <ul>
                     <li><a href="?v=home">Inicio</a></li>
                     <li><a href="?c=record&a=list_record">Registros</a></li>
+                    <li><a href="?c=user&a=sign_out">Cerrar Sesión</a></li>
                 </ul>
             </nav>
         </header>
