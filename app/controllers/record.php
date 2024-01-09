@@ -519,6 +519,43 @@ class RecordController {
         }
     }
 
+    /**
+     * Controlador que elimina un registro de la base de datos
+     *
+     * Este controlador llama al método delete_pivot_record en el modelo 'record'
+     * para realizar la eliminación. También valida la existencia de la sesión de usuario.
+     * 
+     */
+    public function delete_record() {
+        // Validación de sesión
+        session_start();
+        
+        if (!isset($_SESSION['user']['id'])) {
+
+            $this->view('sign_in');
+        } else {
+            // Validación datos GET
+            if (!isset($_GET['id_record']) && empty($_GET['id_record'])) {
+
+                $this->view('sign_in');
+            } else {
+                /**
+                 * Realiza una llamada al método 'delete_pivot_record' para eliminar el registro de manera segura.
+                 * Este método se encarga de ejecutar la lógica necesaria para eliminar el registro asociado.
+                 */
+                $status = $this->recordModel->delete_pivot_record(base64_decode($_GET['id_record']));
+                
+                if ($status) {
+
+                    $this->view('home', 'exito');
+                } else {
+
+                    $this->view('home', 'error');
+                }
+            }
+        }
+    }
+
     // Método seleccionador de vista
     public function view($view, $info = null, $pagination = null) {
 

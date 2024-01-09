@@ -999,4 +999,136 @@ class RecordModel {
             }
         }
     }
+
+    /**
+     * Elimina un registro completo de la tabla pivot 'dato_registro'.
+     * Además, valida si los elementos después de la eliminación tienen relaciones;
+     * en caso contrario, también se eliminan de sus tablas principales.
+     *
+     * @param int $idRecord Identificador del registro en la tabla 'dato_registro'.
+     *
+     * @return bool Devuelve true si la operación fue exitosa; de lo contrario, devuelve false.
+     */
+    public function delete_pivot_record($idRecord) {
+        /**
+         * Sentencia preparada para recuperar todos los registros de la tabla 'dato_registro'
+         * en la base de datos.
+         *
+         * @var string $sql Sentencia SQL preparada
+         */
+        $sql = 'SELECT id_nombre_registro, id_portal_registro, id_correo_registro, id_telefono_registro FROM dato_registro WHERE id = ?';
+        
+        try {
+            $stmt = $this->connection->prepare($sql);
+            $stmt->execute([$idRecord]);
+
+            if ($data = $stmt->fetch(PDO::FETCH_OBJ)) {
+                /**
+                 * Sentencia preparada para la eliminación del registro
+                 * en tabla pivot
+                 * 
+                 * @var string $sql Sentencia SQL preparada
+                 */
+                $sql = 'DELETE FROM dato_registro WHERE id = ?';
+                $stmt = $this->connection->prepare($sql);
+                $stmt->execute([$idRecord]);
+                
+                if ($stmt->rowCount()) {
+                    
+                    /**
+                     * Eliminación de nombre_registro
+                     */
+                    if ($this->delete_unrelated_record(
+                        $sql = '
+                        SELECT
+                            nombre_registro.id
+                        FROM
+                            dato_registro
+                            RIGHT JOIN nombre_registro ON dato_registro.id_nombre_registro = nombre_registro.id
+                        WHERE
+                            dato_registro.id IS NULL
+                            AND nombre_registro.id = ?
+                        ',
+                        $data->id_nombre_registro
+                    )){
+                        $this->delete_a_record(
+                            $sql = 'DELETE FROM nombre_registro WHERE id = ?',
+                            $data->id_nombre_registro
+                        );
+                    }
+
+                    /**
+                     * Eliminación de nombre sitio web
+                     */
+                    if ($this->delete_unrelated_record(
+                        $sql = '
+                        SELECT
+                            portal_registro.id
+                        FROM
+                            dato_registro
+                            RIGHT JOIN portal_registro ON dato_registro.id_portal_registro = portal_registro.id
+                        WHERE
+                            dato_registro.id IS NULL
+                            AND portal_registro.id = ?
+                        ',
+                        $data->id_portal_registro
+                    )){
+                        $this->delete_a_record(
+                            $sql = 'DELETE FROM portal_registro WHERE id = ?',
+                            $data->id_portal_registro
+                        );
+                    }
+
+                    /**
+                     * Eliminación de correo registro
+                     */
+                    if ($this->delete_unrelated_record(
+                        $sql = '
+                        SELECT
+                            correo_registro.id
+                        FROM
+                            dato_registro
+                            RIGHT JOIN correo_registro ON dato_registro.id_correo_registro = correo_registro.id
+                        WHERE
+                            dato_registro.id IS NULL
+                            AND correo_registro.id = ?
+                        ',   
+                        $data->id_correo_registro
+                    )){
+                        $this->delete_a_record(
+                            $sql = 'DELETE FROM correo_registro WHERE id = ?',
+                            $data->id_correo_registro
+                        );
+                    }
+
+                    /**
+                     * Eliminación de telefono registro
+                     */
+                    if ($this->delete_unrelated_record(
+                        $sql = '
+                        SELECT
+                            telefono_registro.id
+                        FROM
+                            dato_registro
+                            RIGHT JOIN telefono_registro ON dato_registro.id_telefono_registro = telefono_registro.id
+                        WHERE
+                            dato_registro.id IS NULL
+                            AND telefono_registro.id = ?
+                        ',
+                        $data->id_telefono_registro
+                    )){
+                        $this->delete_a_record(
+                            $sql = 'DELETE FROM telefono_registro WHERE id = ?',
+                            $data->id_telefono_registro
+                        );
+                    }
+
+                    return true;
+                }
+            }
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
 }

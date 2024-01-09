@@ -29,6 +29,7 @@
                         <td><?= $object->contrasenia?></td>
                         <td><?= $object->clave_recuperacion == null ? 'N/A' : $object->clave_recuperacion ?></td>
                         <td><a href="?id=<?= $object->id_registro?>&c=record&a=edit_record">Editar</a></td>
+                        <td><a href="?id_record=<?= base64_encode($object->id_registro)?>&c=record&a=delete_record">Eliminar</a></td>
                     </tr>
                 <?php 
                 endforeach;
