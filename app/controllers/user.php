@@ -145,7 +145,7 @@ class UserController {
                         //enviar email con enlace
                         $message = '
                             Tiene 5 horas para restablecer su contraseña<br>
-                            <a href="http://192.168.1.5/php/key_chest/app/?id=' . $idUser . '&a=new_password&t=' . urlencode($token) . '">restablecer clave</a>
+                            <a href="http://localhost/php/key_chest/app/?id=' . $idUser . '&a=new_password&t=' . urlencode($token) . '">restablecer clave</a>
                             ';
         
                         //llamada de método 'send_email' enviar correo

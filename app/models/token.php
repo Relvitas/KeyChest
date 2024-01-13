@@ -26,7 +26,17 @@ class TokenModel {
     public function search_token($idUser) {
         //obtener token
         try {
-            $prepare = $this->connection->prepare('SELECT * FROM solicitud_restablecer_contrasenia WHERE id_usuario = ?');
+            $sql = '
+                SELECT
+                    * 
+                FROM
+                    solicitud_restablecer_contrasenia 
+                WHERE
+                    id_usuario = ? 
+                ORDER BY
+                    fecha_expiracion DESC LIMIT 1
+                ';
+            $prepare = $this->connection->prepare($sql);
             $prepare->execute(array($idUser));
             return $result = $prepare->fetch(PDO::FETCH_OBJ);
         } catch (PDOException $e) {
