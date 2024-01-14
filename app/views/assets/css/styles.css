@@ -1,0 +1,108 @@
+* {
+    box-sizing: border-box;
+}
+
+body{
+    background-color: #2a2e3d;
+}
+
+.container-login,
+.container-sign_up,
+.container-reset_password,
+.container-new_password {
+    width: 300px;
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    transform: translate(50%, -50%);
+    
+}
+
+.alert {
+    background-color: #D0D3D4;
+    height: 40px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+}
+
+.alert-true,
+.alert-false {
+    display: flex;
+    align-items: center;
+}
+
+.alert-true i {
+    margin-right: 5px;
+    color: green;
+}
+
+.alert-false i {
+    margin-right: 5px;
+    color: #922B21;
+}
+
+.form-login,
+.form-sign_up,
+.form-reset_password,
+.form-new_password {
+    background-color: #D0D3D4;
+    border-radius:10px;
+    display: flex;
+    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-login {
+    height: 250px;
+}
+
+.form-sign_up {
+    height: 260px;
+}
+
+.form-reset_password {
+    height: 180px;
+}
+
+.form-new_password {
+    height: 220px;
+}
+
+.form-login h1,
+.form-sign_up h1,
+.form-reset_password h1,
+.form-new_password h1 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.input input{
+    height: 40px;
+    padding-left: 10px;
+    border-style: hidden;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.input a {
+    text-decoration: none;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.form {
+    text-align: center;
+}
+
+.form-button{
+    border-radius: 15px;
+    margin-left: 3.5px;
+    margin-right: 3.5px;
+    height: 30px;
+    border: hidden;
+}

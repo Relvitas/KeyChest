@@ -60,19 +60,19 @@ class UserController {
                         $this->view('home');
                     } else {
                         //contraseña incorrecta
-                        $this->view('sign_in', 'clave_incorrecta');
+                        $this->view('sign_in', 'Clave incorrecta');
                     }
                 } else {
                     //correo incorrecto
-                    $this->view('sign_in', 'correo_inexistente');
+                    $this->view('sign_in', 'Correo inexistente');
                 }
             } else {
                 //datos incompletos
-                $this->view('sign_in', 'datos_incompletos');
+                $this->view('sign_in', 'Datos incompletos');
             }
         } else {
             //acceso incorrecto
-            $this->view('sign_in', 'acceso_incorrecto');
+            $this->view('sign_in', 'Acceso incorrecto');
         }
     }
 
@@ -93,13 +93,13 @@ class UserController {
                     if (isset($_POST['password']) && !empty($_POST['password'])) {
                         $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
                     } else {
-                        $this->view('sign_up', 'incompleto');
+                        $this->view('sign_up', 'Campo incompleto');
                     }
                 } else {
-                    $this->view('sign_up', 'incompleto');
+                    $this->view('sign_up', 'Campo incompleto');
                 }
             } else {
-                $this->view('sign_up', 'incompleto');
+                $this->view('sign_up', 'Campo incompleto');
             }
 
             //llamada de función de insertar datos de un nuevo registro usuario
@@ -108,13 +108,13 @@ class UserController {
             //validar resultados de inserción
             if ($insertion_results === 'falla') {
                 //redirigir con error de falla en consulta
-                $this->view('sign_up', 'falla'); 
+                $this->view('sign_up', 'Falla Sistema'); 
             } else if ($insertion_results === 'éxito') {
                 //redirigir con éxito de inserción
-                $this->view('sign_in', 'éxito');
+                $this->view('sign_in', 'Éxito');
             } else {
                 //redirigir con alerta de correo existente
-                $this->view('sign_up', 'correo_existente');
+                $this->view('sign_up', 'Correo existente');
             }
         }
     }
@@ -151,26 +151,26 @@ class UserController {
                         //llamada de método 'send_email' enviar correo
                         if ($this->emailSender->send_email($email, $message)) {
                             //correo enviado
-                            $this->view('reset_password', 'enviado');
+                            $this->view('reset_password', 'Correo enviado');
                         } else {
                             //falla sistema de correo
-                            $this->view('reset_password', 'falla_de_sistema');
+                            $this->view('reset_password', 'Falla sistema');
                         }
                     } else {
                         //falla en db
-                        $this->view('reset_password', 'falla_de_sistema');
+                        $this->view('reset_password', 'Falla sistema');
                     }
                 } else {
                     //correo no existente
-                    $this->view('reset_password', 'correo_invalido');
+                    $this->view('reset_password', 'Correo invalido');
                 }
             } else {
                 //llama vista 'reset_password' y error de campo no rellenado
-                $this->view('reset_password', 'campo_incompleto');
+                $this->view('reset_password', 'Campo incompleto');
             }
         } else {
             //llama vista 'reset_password' y error por no presionar botón
-            $this->view('reset_password', 'acceso_error');
+            $this->view('reset_password', 'Acceso incorrecto');
         }
     }
 
@@ -188,7 +188,7 @@ class UserController {
             //establecer vista y enviar dataArray
             $this->view('new_password', $data);
         } else {
-            $this->view('reset_password', 'datos_faltantes');
+            $this->view('reset_password', 'Datos incompletos');
         }   
     }
 
@@ -225,10 +225,10 @@ class UserController {
                         //actualizar contraseña, método 'new_password' modelo usuario
                         if ($this->userModel->new_password($idUser, $password)) {
                             //redirigir a inicio sesión en caso de éxito de restablecimiento
-                            $this->view('sign_in', 'exito');
+                            $this->view('sign_in', 'Éxito');
                         } else {
                             //redirigir 'sign_in' en caso de error del sistema
-                            $this->view('sign_in', 'sistema_error');
+                            $this->view('sign_in', 'Falla sistema');
                         }
                     } else {
                         //llamar vista 'new_password' y adjuntar nuevamente token y idUsuario
