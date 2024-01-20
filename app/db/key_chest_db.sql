@@ -35,7 +35,7 @@ CREATE TABLE `correo_registro` (
   `correo` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `correo` (`correo`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -65,7 +65,7 @@ CREATE TABLE `dato_registro` (
   CONSTRAINT `fk_datoregistro_portalregistro` FOREIGN KEY (`id_portal_registro`) REFERENCES `portal_registro` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `fk_datoregistro_telefonoregistro` FOREIGN KEY (`id_telefono_registro`) REFERENCES `telefono_registro` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `fk_datoregistro_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -80,7 +80,7 @@ CREATE TABLE `nombre_registro` (
   `nombre` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -95,7 +95,7 @@ CREATE TABLE `portal_registro` (
   `nombre` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -129,7 +129,7 @@ CREATE TABLE `telefono_registro` (
   `telefono` varchar(25) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `telefono` (`telefono`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -149,6 +149,106 @@ CREATE TABLE `usuario` (
   UNIQUE KEY `correo` (`correo`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'baul_claves'
+--
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `buscar_registro` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+DELIMITER ;;
+CREATE DEFINER=`relvitas`@`localhost` PROCEDURE `buscar_registro`( in id_usuario smallint, in dato varchar(255))
+begin
+    select
+        dato_registro.id as id_registro,
+        portal_registro.nombre as sitio_web,
+        correo_registro.correo,
+        nombre_registro.nombre as nombre_usuario,
+        telefono_registro.telefono,
+        dato_registro.contrasenia,
+        dato_registro.clave_recuperacion 
+    from
+        dato_registro 
+        inner join
+            portal_registro 
+            on dato_registro.id_portal_registro = portal_registro.id 
+        left join
+            correo_registro 
+            on dato_registro.id_correo_registro = correo_registro.id 
+        left join
+            nombre_registro 
+            on dato_registro.id_nombre_registro = nombre_registro.id 
+        left join
+            telefono_registro 
+            on dato_registro.id_telefono_registro = telefono_registro.id 
+    where
+        portal_registro.nombre like concat('%', dato, '%') 
+        or correo_registro.correo like concat('%', dato, '%') 
+        or nombre_registro.nombre like concat('%', dato, '%') 
+        or telefono_registro.telefono like concat('%', dato, '%') 
+        or dato_registro.contrasenia like concat('%', dato, '%') 
+        or dato_registro.clave_recuperacion like concat('%', dato, '%') 
+        and dato_registro.id_usuario = id_usuario;
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `buscar_registro_paginado` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+DELIMITER ;;
+CREATE DEFINER=`relvitas`@`localhost` PROCEDURE `buscar_registro_paginado`( in id_usuario smallint, in dato varchar(255), in comienza smallint, in limite smallint)
+begin
+    select
+        dato_registro.id as id_registro,
+        portal_registro.nombre as sitio_web,
+        correo_registro.correo,
+        nombre_registro.nombre as nombre_usuario,
+        telefono_registro.telefono,
+        dato_registro.contrasenia,
+        dato_registro.clave_recuperacion 
+    from
+        dato_registro 
+        inner join
+            portal_registro 
+            on dato_registro.id_portal_registro = portal_registro.id 
+        left join
+            correo_registro 
+            on dato_registro.id_correo_registro = correo_registro.id 
+        left join
+            nombre_registro 
+            on dato_registro.id_nombre_registro = nombre_registro.id 
+        left join
+            telefono_registro 
+            on dato_registro.id_telefono_registro = telefono_registro.id 
+    where
+        portal_registro.nombre like concat('%', dato, '%') 
+        or correo_registro.correo like concat('%', dato, '%') 
+        or nombre_registro.nombre like concat('%', dato, '%') 
+        or telefono_registro.telefono like concat('%', dato, '%') 
+        or dato_registro.contrasenia like concat('%', dato, '%') 
+        or dato_registro.clave_recuperacion like concat('%', dato, '%') 
+        and dato_registro.id_usuario = id_usuario limit comienza, limite;
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -159,4 +259,4 @@ CREATE TABLE `usuario` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-01-14 15:17:58
+-- Dump completed on 2024-01-20 14:08:56
