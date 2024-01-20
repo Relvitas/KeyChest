@@ -117,7 +117,7 @@ class RecordController {
                                     // Uso de bandera
                                     $flag = false;
                                     // Mensaje con tipo error
-                                    $message = 'supera_longitud';
+                                    $message = 'Numero muy largo';
                                     break 2;
                                 }
                 
@@ -125,7 +125,7 @@ class RecordController {
                                     // Uso de bandera
                                     $flag = false;
                                     // Mensaje con tipo error
-                                    $message = 'numero_invalido';
+                                    $message = 'Numero teléfono invalido';
                                     break 2;
                                 }
                                 
@@ -153,7 +153,7 @@ class RecordController {
                                     // Uso de bandera
                                     $flag = false;
                                     // Mensaje con tipo error
-                                    $message = 'contraseña_invalida';
+                                    $message = 'Contraseña invalida';
                                     break 2;
                                 }
     
@@ -163,7 +163,7 @@ class RecordController {
                                 // Uso de bandera
                                 $flag = false;
                                 // mensaje tipo error
-                                $message = 'campos_requeridos';
+                                $message = 'Campos requeridos';
                                 break 2;
                             }
                     }
@@ -186,9 +186,9 @@ class RecordController {
                     y evaluamos resultados
                     */
                     if ($this->recordModel->save_record($data)) {
-                        $this->view('home', 'exito');
+                        $this->view('home', 'Registro guardado');
                     } else {
-                        $this->view('home', 'error');
+                        $this->view('home');
                     }
                 }
             }      
@@ -259,10 +259,14 @@ class RecordController {
                 Se obtienen lo registros y son pasados a la
                 vista junto con la paginación, para su posterior visualización
                 */
-                if ($records = $this->recordModel->list_record($idUser, $startFrom, $pageLimit)) {
+                $records = $this->recordModel->list_record($idUser, $startFrom, $pageLimit);
+
+                if ($records) {
                     $this->view('records', $records, $pagination);
+                } elseif ($record === null) {
+                    $this->view('home', 'Sin registros');
                 } else {
-                    $this->view('home', 'error_sistema');
+                    $this->view('home');
                 }
             }
         }
@@ -410,7 +414,7 @@ class RecordController {
                                     // Uso de bandera
                                     $flag = false;
                                     // Mensaje con tipo error
-                                    $message = 'supera_longitud';
+                                    $message = 'Numero muy largo';
                                     break 2;
                                 }
                 
@@ -418,7 +422,7 @@ class RecordController {
                                     // Uso de bandera
                                     $flag = false;
                                     // Mensaje con tipo error
-                                    $message = 'numero_invalido';
+                                    $message = 'Numero teléfono invalido';
                                     break 2;
                                 }
                                 
@@ -446,7 +450,7 @@ class RecordController {
                                     // Uso de bandera
                                     $flag = false;
                                     // Mensaje con tipo error
-                                    $message = 'contraseña_invalida';
+                                    $message = 'Contraseña invalida';
                                     break 2;
                                 }
     
@@ -456,7 +460,7 @@ class RecordController {
                                 // Uso de bandera
                                 $flag = false;
                                 // mensaje tipo error
-                                $message = 'campos_requeridos';
+                                $message = 'Campos requeridos';
                                 break 2;
                             }
                             break;
@@ -482,7 +486,7 @@ class RecordController {
                                     // Uso de bandera
                                     $flag = false;
                                     // mensaje tipo error
-                                    $message = 'error_sistema';
+                                    $message = 'Falla sistema';
                                     break 2;
                                 }
 
@@ -510,7 +514,7 @@ class RecordController {
                     $message = $this->recordModel->update_record($data);
 
                     if ($message === true) {
-                        $this->view('home', 'exito');
+                        $this->view('home', 'Registro actualizado');
                     } else {
                         $this->view('home', $message);
                     }
@@ -547,10 +551,134 @@ class RecordController {
                 
                 if ($status) {
 
-                    $this->view('home', 'exito');
+                    $this->view('home', 'Registro eliminado');
                 } else {
 
-                    $this->view('home', 'error');
+                    $this->view('home');
+                }
+            }
+        }
+    }
+
+    /**
+     * Muestra la vista de confirmación de eliminación,
+     * brindando al usuario la oportunidad de confirmar
+     * su decisión de eliminar los datos seleccionados.
+     *
+     * Este método proporciona una interfaz gráfica para que
+     * el usuario confirme su acción antes de realizar la eliminación.
+     */
+    public function confirm_deletion() {
+        // Restaurar sesión
+        session_start();
+        // Validar sesión
+        if (!isset($_SESSION['user']['id'])) {
+            $this->view('sign_in');
+        } else {
+            // Validar datos get
+            if (!isset($_GET['id_record']) && empty($_GET['id_record'])) {
+                $this->view('sign_in');
+            } else {
+                // Almacenar dato get
+                $idRecord = $_GET['id_record'];
+
+                // Cargar vista de confirmación
+                $this->view('confirm_deletion', $idRecord);
+            }
+        }
+    }
+
+    /**
+     * Realiza la búsqueda de un dato en la base de datos.
+     *
+     * Esta función se encarga de buscar un dato proporcionado por el usuario
+     * en la base de datos, devolviendo los resultados correspondientes.
+     */
+    public function search_record() {
+        // Restaurar sesión
+        session_start();
+        // Validar sesión
+        if (!isset($_SESSION['user']['id'])) {
+            $this-view('sign_in', 'Acceso incorrecto');
+        } else {
+            // Validar información post
+            if (!isset($_POST['buscar']) && empty($_POST['buscar'])) {
+                $this->view('sign_in', 'Acceso incorrecto');
+            } else {
+
+                /*
+                Obtener el numero de pagina seleccionada 
+                por el usuario o establecer default en 1
+                */
+                $page = isset($_GET['p']) && !empty($_GET['p']) 
+                    ? $_GET['p']
+                    : 1;
+
+                /*
+                $pageLimit, establece el limite de
+                cantidad de regustos maxima que queramos
+                mostrar tabla
+                */
+                $pageLimit = 5; 
+
+                /*
+                $startForm, configuración que contiene
+                el numero de pagina que se desea mostrar
+                */
+                $startFrom = ($page-1)*$pageLimit;
+
+                /**
+                 * @var $id_usuario almacenara el id del usuario
+                 */
+                $id_usuario = $_SESSION['user']['id'];
+
+                /**
+                 * @var $dato almacenara el la información
+                 * que el usuario desea buscar, esta se recibirá 
+                 * mediante el método post
+                 */
+                $dato = $_POST['buscar'];
+
+                /**
+                 * Variable que almacena los datos posibles relacionados a la búsqueda.
+                 * Se obtienen invocando la función search_record de recordModel.
+                 * 
+                 * @var array $results
+                 */
+                $results = $this->recordModel->search_record($id_usuario, $dato);
+
+                /**
+                 * Variable que almacena el número total de páginas en las que se debe paginar.
+                 * Calcula el número total de filas y lo divide entre el límite de registros máximos a mostrar.
+                 * 
+                 * @var int $totalPages
+                 */
+                
+                $totalPages = ceil(count($results)/$pageLimit);
+
+                /**
+                 * Almacena el código HTML necesario para la paginación.
+                 * Este código se genera mediante la función utilitaria `paginator()`.
+                 *
+                 * @var string $pagination Contiene el HTML de la paginación.
+                 */
+                $pagination = paginator($page, $totalPages, '?c=record&a=list_record&p=');
+
+                /**
+                 * Variable que almacena los datos y que comienzan desde 
+                 * cierto registro dado, es decir la paginación como tal
+                 * 
+                 * @var array $results
+                 */
+                $results = $this->recordModel->search_record_pagination($id_usuario, $dato, $startFrom, $pageLimit);
+                
+                // Carga de vista
+                if ($results) {
+                    $this->view('records', $results, $pagination);
+                } elseif ($results == null) {
+                    $this->view('records', 'Sin registros');
+                } else {
+                    $this->view('home');
                 }
             }
         }

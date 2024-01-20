@@ -1131,4 +1131,49 @@ class RecordModel {
             return false;
         }
     }
+
+    /**
+     * Realiza una búsqueda de datos para un usuario específico.
+     *
+     * Este método busca un dato específico proporcionado por el usuario para el usuario identificado por su ID.
+     *
+     * @param int $idUser ID del usuario para el que se realiza la búsqueda.
+     * @param string $dato El dato que el usuario desea buscar.
+     *
+     * @return array|bool Retorna un array que contiene las filas de datos correspondientes o false en caso de error.
+     */
+    public function search_record($idUser, $dato) {
+        $sql = 'call buscar_registro(?, ?)';
+        try {
+            $stmt = $this->connection->prepare($sql);
+            $stmt->execute([$idUser, $dato]);
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Obtiene y retorna datos paginados según los parámetros proporcionados.
+     *
+     * @param int $idUser ID del usuario para la búsqueda.
+     * @param string $dato Dato que el usuario desea buscar.
+     * @param int $startFrom Desde dónde comenzará a recuperar los datos.
+     * @param int $pageLimit Límite de registros a mostrar.
+     * 
+     * @return array|bool Retorna un array que contiene los datos limitados a
+     * cierta cantidad o False en caso de error.
+     */
+    public function search_record_pagination($idUser, $dato, $starFrom, $pageLimit) {
+        $sql = 'call buscar_registro_paginado(?, ?, ?, ?)';
+        try {
+            $stmt = $this->connection->prepare($sql);
+            $stmt->execute([$idUser, $dato, $starFrom, $pageLimit]);
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
 }

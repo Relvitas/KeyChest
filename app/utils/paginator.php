@@ -18,7 +18,7 @@ function paginator($page, $total_pages, $path) {
         for ($i = 1; $i <= $total_pages; $i ++) {
             
             if (!($i == 1 && $total_pages == 1)) {
-                $configure_paging .= '<a href="' . $path . $i . '">' . $i . '</a>' . ' ';
+                $configure_paging .= '<a class="page-number" href="' . $path . $i . '">' . $i . '</a>' . ' ';
             }
         }
     
@@ -29,9 +29,9 @@ function paginator($page, $total_pages, $path) {
     } elseif (($page > 0 && $page < 3) && $total_pages > 3) {
         
         for ($i = 1; $i <= 3; $i++ ) {
-            $configure_paging .= '<a href="' . $path . $i . '">' . $i . '</a>' . ' '; 
+            $configure_paging .= '<a class="page-number" href="' . $path . $i . '">' . $i . '</a>' . ' '; 
         }
-        $configure_paging .='<a href="' . $path . ($page + 1) . '">Siguiente ></a>';
+        $configure_paging .='<a class="next-page" href="' . $path . ($page + 1) . '">Siguiente &gt;</a>';
 
     // Configuración de paginación
     } elseif ($page > 2 && $page <= $total_pages) {
@@ -39,35 +39,35 @@ function paginator($page, $total_pages, $path) {
         // Se encarga de mantener los tres últimos resultados
         if ($page == $total_pages) {
 
-            $configure_paging .= '<a href="' . $path . ($page - 1) . '">< Anterior</a>' . ' ';
+            $configure_paging .= '<a class="previous-page" href="' . $path . ($page - 1) . '">&lt; Anterior</a>' . ' ';
             for ($i = $page -2; $i <= $total_pages; $i++) {
-                $configure_paging .= '<a href="' . $path . $i . '">' . $i . '</a>' . ' '; 
+                $configure_paging .= '<a class="page-number" href="' . $path . $i . '">' . $i . '</a>' . ' '; 
             }
 
         // Se encarga de mantener los tres últimos resultados
         } elseif ($page + 1 == $total_pages) {
     
-            $configure_paging .= '<a href="' . $path . ($page - 1) . '">< Anterior</a>' . ' ';
+            $configure_paging .= '<a class="previous-page" href="' . $path . ($page - 1) . '">&lt; Anterior</a>' . ' ';
             for ($i = $page -1; $i <= $total_pages; $i++) {
-                $configure_paging .= '<a href="' . $path . $i . '">' . $i . '</a>' . ' '; 
+                $configure_paging .= '<a class="page-number" href="' . $path . $i . '">' . $i . '</a>' . ' '; 
             }
 
         // Se encarga de mantener los tres últimos resultados
         } elseif ($page + 2 == $total_pages) {
     
-            $configure_paging .= '<a href="' . $path . ($page - 1) . '">< Anterior</a>' . ' ';
+            $configure_paging .= '<a class="previous-page" href="' . $path . ($page - 1) . '">&lt; Anterior</a>' . ' ';
             for ($i = $page; $i <= $total_pages; $i++) {
-                $configure_paging .= '<a href="' . $path . $i . '">' . $i . '</a>' . ' '; 
+                $configure_paging .= '<a class="page-number" href="' . $path . $i . '">' . $i . '</a>' . ' '; 
             }
         
         // Se encarga de mostrar paginación completa
         } else {
 
-            $configure_paging .= '<a href="' . $path . ($page - 1) . '">< Anterior</a>' . ' ';
+            $configure_paging .= '<a class="previous-page" href="' . $path . ($page - 1) . '">&lt; Anterior</a>' . ' ';
             for ($i = 1; $i <= 3; $i++) {
-                $configure_paging .= '<a href="' . $path . $i . '">' . $page++ . '</a>' . ' '; 
+                $configure_paging .= '<a class="page-number" href="' . $path . $i . '">' . $page++ . '</a>' . ' '; 
             }
-            $configure_paging .='<a href="' . $path . ($page - 2) . '">Siguiente ></a>';
+            $configure_paging .='<a class="next-page" href="' . $path . ($page - 2) . '">Siguiente &gt;</a>';
 
         }
     }
